@@ -1,15 +1,15 @@
+import { randomUUID } from "crypto";
+
 export class Student {
   constructor(
     // public name: string,
-    public age: number,
-    public abscencePercentage: number,
-    public gradeAverage: number
+    public age: number
   ) {}
 }
 
 export class Cluster {
   private centroide: object | null = null;
-  private objects: object[] = [];
+  public objects: object[] = [];
 
   constructor(public readonly name: string, centroide: object) {
     this.add(centroide);
@@ -58,7 +58,24 @@ export class Cluster {
 }
 
 export class ClusterManager {
-  constructor(private readonly clusters: Cluster[]) {}
+  constructor(
+    public readonly clusters: Cluster[],
+    private readonly maxLimiar: number = 10
+  ) {}
+
+  reorganizeClusters(newCluster: Cluster) {
+    for (const cluster of this.clusters) {
+      for (const object of cluster.objects) {
+        const x = cluster.calculateCoeficiente(object);
+        const y = newCluster.calculateCoeficiente(object);
+
+        if (y > x && cluster.objects.length > 1) {
+          newCluster.add(object);
+          cluster.remove(object);
+        }
+      }
+    }
+  }
 
   add(object: object) {
     const menorLimiar = {
@@ -74,10 +91,13 @@ export class ClusterManager {
         menorLimiar.currentIndex = i;
       }
     }
+    if (menorLimiar.clusterLimiarValue > this.maxLimiar) {
+      const newCluster = new Cluster(randomUUID(), object);
+      this.clusters.push(newCluster);
+      return this.reorganizeClusters(newCluster);
+    }
 
-    console.log(menorLimiar);
-
-    this.clusters[menorLimiar.currentIndex].add(object);
     console.dir(this.clusters, { depth: null });
+    this.clusters[menorLimiar.currentIndex].add(object);
   }
 }
