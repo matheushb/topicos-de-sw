@@ -1,5 +1,10 @@
 import { randomUUID } from "crypto";
 
+function isValidDate(date: string) {
+  const data = new Date(date);
+  return !isNaN(data.getTime());
+}
+
 export class Student {
   constructor(
     // public name: string,
@@ -37,14 +42,66 @@ export class Cluster {
 
   private updateCentroide() {
     Object.keys(this.centroide).forEach((key) => {
-      const newCentroidColumnValue =
-        this.objects.reduce((acc, curr) => {
-          acc += curr[key];
-          return acc;
-        }, 0) / this.objects.length;
+      let newCentroidColumnValue = 0;
 
-      this.centroide[key] = newCentroidColumnValue;
+      if (typeof this.centroide[key] === "number") {
+        newCentroidColumnValue += this.calculateNumberColumn(key);
+      } else if (typeof this.centroide[key] === "string") {
+        newCentroidColumnValue += this.calculateStringColumn(key);
+      } else if (typeof this.centroide[key] === "boolean") {
+        newCentroidColumnValue += this.calculateBooleanColumn(key);
+      } else if (isValidDate(this.centroide[key])) {
+        this.centroide[key] = this.calculateDate(key);
+      }
     });
+  }
+
+  private calculateBooleanColumn(key: string): number {
+    return (
+      this.objects.reduce((acc, curr) => {
+        if (curr[key] !== this.centroide[key]) acc += 1;
+        return acc;
+      }, 0) / this.objects.length
+    );
+  }
+
+  private calculateStringColumn(key: string): number {
+    return (
+      this.objects.reduce((acc, curr) => {
+        if (normalizarString(curr[key]) !== this.centroide[key]) acc += 1;
+        return acc;
+      }, 0) / this.objects.length
+    );
+
+    function normalizarString(str: string) {
+      return str
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9\s]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+  }
+
+  private calculateNumberColumn(key: string) {
+    return (
+      this.objects.reduce((acc, curr) => {
+        acc += curr[key];
+        return acc;
+      }, 0) / this.objects.length
+    );
+  }
+
+  private calculateDate(key: string) {
+    //#TODO: arrumar essa porra pra ser chamad em cima
+    // (new Date().getTime() - new Date("2024-01").getTime()) / 1_000_000_000
+    return (
+      this.objects.reduce((acc, curr) => {
+        const dateValue = new Date(curr[key]).getTime();
+        acc += dateValue;
+        return acc;
+      }, 0) / this.objects.length
+    );
   }
 
   public calculateCoeficiente(object: object) {
@@ -66,10 +123,10 @@ export class ClusterManager {
   reorganizeClusters(newCluster: Cluster) {
     for (const cluster of this.clusters) {
       for (const object of cluster.objects) {
-        const x = cluster.calculateCoeficiente(object);
-        const y = newCluster.calculateCoeficiente(object);
+        const currentClusterCoeficiente = cluster.calculateCoeficiente(object);
+        const newClusterCoeficiente = newCluster.calculateCoeficiente(object);
 
-        if (y > x && cluster.objects.length > 1) {
+        if (newClusterCoeficiente < currentClusterCoeficiente) {
           newCluster.add(object);
           cluster.remove(object);
         }
@@ -97,7 +154,6 @@ export class ClusterManager {
       return this.reorganizeClusters(newCluster);
     }
 
-    console.dir(this.clusters, { depth: null });
     this.clusters[menorLimiar.currentIndex].add(object);
   }
 }
