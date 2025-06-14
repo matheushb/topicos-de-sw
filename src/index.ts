@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { Student, Cluster, ClusterManager } from "./student.js";
+import { Student, Cluster, ClusterManager } from "./cluster.js";
 
 const cluster1 = new Cluster(randomUUID(), {
   age: 23,
