@@ -1,19 +1,20 @@
 {
-  "name": "topicos",
-  "version": "1.0.0",
-  "main": "src/index.ts",
-  "type": "module",
-  "scripts": {
-    "start": "tsc && node dist/index.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "@types/node": "^22.15.21"
-  },
-  "devDependencies": {
-    "ts-node": "^10.9.2"
-  }
+    "name": "topicos",
+    "version": "1.0.0",
+    "main": "src/index.ts",
+    "type": "module",
+    "scripts": {
+        "start:km": "tsc && node dist/k-means.js",
+        "start:knn": "tsc && node dist/k-nn.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "@types/node": "^22.15.21"
+    },
+    "devDependencies": {
+        "ts-node": "^10.9.2"
+    }
 }
