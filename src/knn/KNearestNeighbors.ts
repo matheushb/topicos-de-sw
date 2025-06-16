@@ -19,7 +19,7 @@ export class KNearestNeighbors {
         }
     }
 
-    public add(object: object) {
+    private getLesserLimiar(object: object) {
         const menorLimiar = {
             clusterLimiarValue: this.clusters[0].clusterCoeficiente.calculateCoeficiente(object),
             currentIndex: 0,
@@ -33,12 +33,28 @@ export class KNearestNeighbors {
                 menorLimiar.currentIndex = i;
             }
         }
-        if (menorLimiar.clusterLimiarValue > this.maxLimiar) {
+        if (menorLimiar.clusterLimiarValue > this.maxLimiar && !this.weights.isKNN) {
             const newCluster = new Cluster(randomUUID(), object, this.weights);
             this.clusters.push(newCluster);
             return this.reorganizeClusters(newCluster);
         }
 
+        return menorLimiar;
+    }
+
+    public add(object: object) {
+        const menorLimiar = this.getLesserLimiar(object);
+
+        if (!menorLimiar) return;
+
         this.clusters[menorLimiar.currentIndex].add(object);
+    }
+
+    public classify(object: object) {
+        const menorLimiar = this.getLesserLimiar(object);
+
+        if (!menorLimiar) return;
+
+        return this.clusters[menorLimiar.currentIndex].name;
     }
 }

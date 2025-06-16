@@ -3,4 +3,5 @@ export type Weight = {
     number: number;
     boolean: number;
     date: number;
+    isKNN: boolean;
 };

@@ -15,8 +15,9 @@ export enum LabelEnum {
 const clusterWeights = {
     boolean: 4,
     date: 0.0001,
-    number: 0.7,
+    number: 0.5,
     string: 4,
+    isKNN: false,
 } satisfies Weight;
 
 const cluster1 = new Cluster(
